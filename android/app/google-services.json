@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "756878768097",
+    "firebase_url": "https://semangka-d426c-default-rtdb.firebaseio.com",
+    "project_id": "semangka-d426c",
+    "storage_bucket": "semangka-d426c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756878768097:android:fc0b87c514e2fac8eec4a0",
+        "android_client_info": {
+          "package_name": "com.example.flutter_todo_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "756878768097-67pmmr7ib7vgu5nu3rboc02i6087c77p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDooplqU5DEjuc-06zQhnuZtikuHydq40Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "756878768097-67pmmr7ib7vgu5nu3rboc02i6087c77p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
