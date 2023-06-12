@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
 // import 'package:flutter_login/src/models/signup_data.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // ini file yang pakai plugin login nya
 
 import '../providers/auth2.dart';
@@ -37,6 +38,9 @@ class _LoginPageState extends State<LoginPage> {
       try {
         await Provider.of<Auth2>(context, listen: false)
             .login(data.name, data.password);
+            final prefs = await SharedPreferences.getInstance();
+      prefs.setString('email', data.name);
+      print(prefs.getString('email'));
       } catch (err) {
         print(err);
         return err.toString();

@@ -65,14 +65,15 @@ class DrawerWidget extends StatelessWidget {
 
 
 Widget _drawerHeader() {
-  return UserAccountsDrawerHeader(
-    currentAccountPicture: ClipOval(
-      child: Image(
-          image: AssetImage('assets/images/avatar.jpg'), fit: BoxFit.cover),
-    ),
-    accountName: Text('Siapa Yhhhh'),
-    accountEmail: Text('iniemailnya@gmail.com'),
-  );
+  return DrawerHeader(child: Image(image: AssetImage('assets/images/log.png'),));
+  // return UserAccountsDrawerHeader(
+  //   currentAccountPicture: ClipOval(
+  //     child: Image(
+  //         image: AssetImage('assets/images/avatar.jpg'), fit: BoxFit.cover),
+  //   ),
+  //   accountName: Text('Siapa Yhhhh'),
+  //   accountEmail: Text('iniemailnya@gmail.com'),
+  // );
 }
 
 Widget _drawerItem(

@@ -111,29 +111,7 @@ class ProfileWidget extends StatelessWidget {
                   const SizedBox(
                     width: 20,
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Email",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Poppins',
-                          color: Color(0xFF241F7B),
-                        ),
-                      ),
-                      Text(
-                        user!.email,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: 'Poppins',
-                          color: Color(0xFF241F7B),
-                        ),
-                      ),
-                    ],
-                  )
+                  
                 ],
               ),
               const SizedBox(

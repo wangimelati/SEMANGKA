@@ -34,7 +34,8 @@ class about extends StatelessWidget {
               "Aplikasi ini dikembangkan oleh kelompok 5:\n"
               "Aliyah Hasna		  (082111633070) \n"
               "Vika Amalia S.A	(082111633075) \n"
-              "Wangi Melati A.	(082111633078) \n",
+              "Wangi Melati A.	(082111633078) \n\n"
+              "Versi 3.0\n",
               style: TextStyle(
                 fontSize: 16.0,
                 color: Color(0xfffffefe),

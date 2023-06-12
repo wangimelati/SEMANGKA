@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth2.dart';
 import 'package:provider/provider.dart';
 
@@ -14,6 +18,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _auth = FirebaseAuth.instance;
+  String? id;
+  // String? email;
 
   String _errorMessage = '';
 
@@ -24,17 +30,39 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     super.dispose();
   }
 
+  // @override
+  // void initState() async{
+  //   print("halo");
+  //   // getData();
+  // }
+
+//   void getData()async{
+// final prefs = await SharedPreferences.getInstance();
+//     // final _uid = prefs.getString('id');
+//     // final authData = prefs.get('authData');
+//     // print(prefs.get('authData'));
+//     Map<String, dynamic> data = jsonDecode(prefs.get("authData") as String) as Map<String, dynamic>;
+//   String iniId = data['uid'];
+//   setState(() {
+//     id = iniId;
+//   });
+//   }
+
   Future<void> _resetPassword() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        await _auth.sendPasswordResetEmail(email: _emailController.text);
-        _showSuccessDialog('Reset password link has been sent to your email');
-      } catch (error) {
-        setState(() {
-          _errorMessage = error.toString();
-        });
-      }
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? email = prefs.getString("email");
+      print(email);
+      // ;
+      // setState(() {
+      //   email = prefs.getString("email")!;
+      // });
+      // String? email = prefs.getString('email');
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email!);
+    print('Email reset password berhasil dikirim');
+  } catch (error) {
+    print('Terjadi kesalahan saat mengirim email reset password: $error');
+  }
   }
 
   void _showSuccessDialog(String message) {
@@ -67,16 +95,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value!.isEmpty || !value.contains('@')) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null;
-                },
-              ),
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _resetPassword,

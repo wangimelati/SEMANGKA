@@ -20,6 +20,7 @@ class EventProvider extends ChangeNotifier {
           await FirebaseFirestore.instance.collection('events').get({
         'title': eventData.title,
         'time': eventData.time,
+        'userId' : eventData.userId
       } as GetOptions?);
 
       // final QuerySnapshot snapshot =
@@ -59,12 +60,14 @@ class EventProvider extends ChangeNotifier {
           await FirebaseFirestore.instance.collection('events').add({
         'title': event.title,
         'time': event.time,
+        'userId' : event.userId
       });
 
       final newEvent = Event(
         id: docRef.id,
         title: event.title,
         time: event.time,
+        userId : event.userId
       );
 
       _events.add(newEvent);

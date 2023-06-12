@@ -1,5 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:semangka_todolist_new/screens/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// final userProvider = Provider<User?>((ref) {
+//   User? currentUser = FirebaseAuth.instance.currentUser;
+//   return currentUser;
+// });
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,16 +18,30 @@ class _LoginPageState extends State<LoginPage> {
   late String _username;
   late String _email;
   late String _password;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _submitForm() {
+  void _submitForm() async{
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Home()),
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: _email,
+          password: _password,
         );
-      }
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setString('email', _email);
+      print(_email);
+        print(userCredential);
+        User? user = userCredential.user;
+      _formKey.currentState!.save();
+      print(user);
+      print(userCredential);
+if (user != null) {
+  print(user);
+      print(userCredential);
+          // Navigator.push(
+          // context,
+          // MaterialPageRoute(builder: (context) => Home()),
+        // );
+        }
       // Authenticate user with _username, _email, and _password
     }
   }

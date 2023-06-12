@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/todo.dart';
 import '../constants/colors.dart';
@@ -10,7 +13,9 @@ import '../pages/focuss.dart';
 import '../widgets/nav-drawer.dart';
 
 class Home extends StatefulWidget {
+  // final User user;
   Home({Key? key}) : super(key: key);
+  // const Home({required this.user});
 
   @override
   State<Home> createState() => _HomeState();
@@ -22,31 +27,87 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final _todoController = TextEditingController();
   late CollectionReference _todosCollection;
   late FirebaseAuth _auth;
+  // late User _currentUser;
   User? _user;
+  String? uid;
 
   @override
   void initState() {
-    _foundToDo = todosList;
-    _auth = FirebaseAuth.instance;
-    _fetchUser();
     super.initState();
+    // _currentUser = widget.user;
+    getCurrentUser();
+    _foundToDo = todosList;
+    // print(_user);
+    // print("halo");
+    _auth = FirebaseAuth.instance;
+    // print()
+    // _fetchUser();
     controller = TabController(length: 3, vsync: this);
     _todosCollection = FirebaseFirestore.instance.collection('todos');
   }
+  void _addToDoItem(String toDo) async{
+    final prefs = await SharedPreferences.getInstance();
+    Map<String, dynamic> data = jsonDecode(prefs.get("authData") as String) as Map<String, dynamic>;
+  String iniId = data['uid'];
+  // print(_user);
+  print(iniId);
+  print(toDo);
+  setState(() {
+    todosList.add(
+      ToDo(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      todoText: toDo,
+      isDone: false,
+      userId: iniId,
+    ));
+    _todosCollection.add({
+      'todoText': toDo,
+      'isDone': false,
+      'userId': iniId,
+    });
+  });
+  _todoController.clear();
+}
+  void getCurrentUser() async{
+    final prefs = await SharedPreferences.getInstance();
+    final _uid = prefs.getString('id');
+    final authData = prefs.get('authData');
+    print(prefs.get('authData'));
+    Map<String, dynamic> data = jsonDecode(prefs.get("authData") as String) as Map<String, dynamic>;
+  String iniId = data['uid'];
+  print(iniId);
+    // jsonDecode(authData)["uid"];
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    // print(currentUser);
+    // if (currentUser != null) {
+      setState(() {
+        _user = currentUser;
+        uid = iniId;
+      });
+      // print(_user);
+    // }else{
+    //   print(currentUser);
+    // }
+  }
 
-  Future<void> _fetchUser() async {
-  _user = _auth.currentUser;
-  if (_user == null) {
-    try {
-      // Sign in anonymously jika pengguna belum login
-      final userCredential = await _auth.signInAnonymously();
-      _user = userCredential.user;
-    } catch (e) {
-      print('Error signing in anonymously: $e');
-    }
-  }
-  setState(() {});
-  }
+  // Future<void> _fetchUser() async {
+  // _user = _auth.currentUser;
+  // print(_user);
+  // if (_user == null) {
+  //   try {
+  //     // Sign in anonymously jika pengguna belum login
+  //     final userCredential = await _auth.signInAnonymously();
+  //     _user = userCredential.user;
+  //     print(_user);
+  //     setState(() {
+        
+  //     });
+  //   } catch (e) {
+  //     print('Error signing in anonymously: $e');
+  //   }
+  // }
+  // setState(() {});
+  // }
 
   late TabController controller;
 
@@ -63,7 +124,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: tdYellow,
         title: Text(
-          "SEMANGKA!",
+          "Semangka",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 30,
@@ -109,7 +170,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                     Expanded(
                       child: StreamBuilder<QuerySnapshot>(
                         stream: _todosCollection
-                                .where('userId', isEqualTo: _user?.uid)
+                                .where('userId', isEqualTo: uid)
                                 .snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.hasData) {
@@ -233,23 +294,6 @@ void _deleteToDoItem(String id) {
   });
 }
 
-void _addToDoItem(String toDo) {
-  setState(() {
-    todosList.add(
-      ToDo(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      todoText: toDo,
-      isDone: false,
-      userId: _user?.uid,
-    ));
-    _todosCollection.add({
-      'todoText': toDo,
-      'isDone': false,
-      'userId': _user?.uid,
-    });
-  });
-  _todoController.clear();
-}
 
 void _runFilter(String enteredKeyword) {
   List<ToDo> results = [];

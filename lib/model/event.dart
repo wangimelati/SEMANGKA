@@ -6,11 +6,13 @@ class Event {
   final String id;
   final String title;
   final TimeOfDay time;
+  final String userId;
 
   Event({
     required this.id,
     required this.title,
     required this.time,
+    required this.userId
   });
 
   factory Event.fromFirestore(
@@ -22,6 +24,7 @@ class Event {
       id: data!['id'],
       title: data['title'],
       time: data['time'],
+      userId : data['userId']
     );
   }
 
@@ -31,6 +34,7 @@ class Event {
       if (id != null) "id": id,
       if (title != null) "title": title,
       if (time != null) "time": time,
+      if (userId != null) "userId" : userId 
     };
   }
 }

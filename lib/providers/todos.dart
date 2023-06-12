@@ -102,6 +102,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/todo.dart';
 import '../providers/auth2.dart';
@@ -132,12 +133,17 @@ class ToDoProvider extends ChangeNotifier {
   }
 
   Future<void> addToDoItem(ToDo todoText) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final authData = prefs.get('authData');
+  //   print(prefs.get('authData'));
+  //   Map<String, dynamic> data = jsonDecode(prefs.get("authData") as String) as Map<String, dynamic>;
+  // String iniId = data['uid'];
     try {
       final newToDo = ToDo(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         todoText: todoText.toString(),
         isDone: false,
-        userId: _user?.uid,
+        userId: todoText.toString(),
       );
       await _todosCollection.add(newToDo.toFirestore());
       _todos.add(newToDo);

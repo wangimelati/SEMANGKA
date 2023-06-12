@@ -1,19 +1,16 @@
-import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
-import '../model/event.dart';
-import 'package:date_time_picker/date_time_picker.dart';
-import '../constants/colors.dart';
-
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Event {
   final String title;
   final TimeOfDay time;
+  final String userId;
 
-  Event({required this.title, required this.time});
+  Event({required this.title, required this.time, required this.userId});
 }
 
 class Calendar extends StatefulWidget {
@@ -26,38 +23,73 @@ class _CalendarState extends State<Calendar> {
   CalendarFormat format = CalendarFormat.month;
   DateTime selectedDay = DateTime.now();
   DateTime focusedDay = DateTime.now();
+  String? uid;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
+    getUid();
     selectedEvents = {};
+    _loadEvents();
     super.initState();
   }
 
   List<Event> _getEventsfromDay(DateTime date) {
-    return selectedEvents[date] ?? [];
+  DateTime dayKey = DateTime(date.year, date.month, date.day);
+
+  if (selectedEvents.containsKey(dayKey)) {
+    return selectedEvents[dayKey]!;
   }
+
+  return [];
+}
+
+void getUid()async{
+  final prefs = await SharedPreferences.getInstance();
+    // final _uid = prefs.getString('id');
+    // final authData = prefs.get('authData');
+    // print(prefs.get('authData'));
+    Map<String, dynamic> data = jsonDecode(prefs.get("authData") as String) as Map<String, dynamic>;
+  String iniId = data['uid'];
+  setState(() {
+    uid = iniId;
+  });
+  print(uid);
+}
 
   Future<void> _loadEvents() async {
-    QuerySnapshot querySnapshot =
-        await firestore.collection('events').get();
+    final prefs = await SharedPreferences.getInstance();
+    // final _uid = prefs.getString('id');
+    // final authData = prefs.get('authData');
+    // print(prefs.get('authData'));
+    Map<String, dynamic> data = jsonDecode(prefs.get("authData") as String) as Map<String, dynamic>;
+  String iniId = data['uid'];
+  print(iniId);
+  QuerySnapshot querySnapshot = await firestore.collection('events').where('userId', isEqualTo: iniId).get();
 
-    querySnapshot.docs.forEach((doc) {
-      DateTime date = (doc['date'] as Timestamp).toDate();
-      Event event = Event(
-        title: doc['title'],
-        time: TimeOfDay.fromDateTime(date),
-      );
+  querySnapshot.docs.forEach((doc) {
+    Timestamp timestamp = doc['date'];
+    DateTime date = timestamp.toDate();
+    Event event = Event(
+      title: doc['title'],
+      time: TimeOfDay.fromDateTime(date),
+      userId : doc['userId']
+    );
 
-      if (selectedEvents[date] != null) {
-        selectedEvents[date]!.add(event);
-      } else {
-        selectedEvents[date] = [event];
-      }
-    });
+    if (selectedEvents.containsKey(date)) {
+      selectedEvents[date]!.add(event);
+      print(selectedEvents[date]);
+    } else {
+      selectedEvents[date] = [event];
+      print(selectedEvents[date]);
+    }
+  });
 
-    setState(() {});
-  }
+  print(selectedEvents);
+
+  setState(() {});
+}
+
 
   Future<void> _addEvent(Event event) async {
     DateTime date = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
@@ -65,9 +97,10 @@ class _CalendarState extends State<Calendar> {
     await events.add({
       'title': event.title,
       'date': date,
+      'userId' : uid
     });
 
-    if (selectedEvents[date] != null) {
+    if (selectedEvents.containsKey(date)) {
       selectedEvents[date]!.add(event);
     } else {
       selectedEvents[date] = [event];
@@ -135,7 +168,7 @@ class _CalendarState extends State<Calendar> {
                   ),
                   SizedBox(height: 16),
                   InkWell(
-                                       onTap: () async {
+                    onTap: () async {
                       TimeOfDay? selectedTime = await showTimePicker(
                         context: context,
                         initialTime: _selectedTime,
@@ -172,6 +205,7 @@ class _CalendarState extends State<Calendar> {
                       Event event = Event(
                         title: eventTitle,
                         time: _selectedTime,
+                        userId: "hello"
                       );
                       _addEvent(event);
                       Navigator.pop(context);
@@ -187,174 +221,3 @@ class _CalendarState extends State<Calendar> {
     );
   }
 }
-
-
-
-
-
-
-
-// class Calendar extends StatefulWidget {
-//   @override
-//   _CalendarState createState() => _CalendarState();
-// }
-
-// class _CalendarState extends State<Calendar> {
-//   late Map<DateTime, List<Event>> selectedEvents;
-//   CalendarFormat format = CalendarFormat.month;
-//   DateTime selectedDay = DateTime.now();
-//   DateTime focusedDay = DateTime.now();
-//   TimeOfDay selectedTime = TimeOfDay.now();
-
-//   TextEditingController _eventController = TextEditingController();
-//   TextEditingController _timeController = TextEditingController();
-
-//   @override
-//   void initState() {
-//     selectedEvents = {};
-//     super.initState();
-//   }
-
-//   List<Event> _getEventsfromDay(DateTime date) {
-//     return selectedEvents[date] ?? [];
-//   }
-
-//   @override
-//   void dispose() {
-//     _eventController.dispose();
-//     super.dispose();
-//     _timeController.dispose();
-//   }
-
-//   @override
-//   StatefulWidget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: tdBGColor,
-//       body: Column(
-//         children: [
-//           TableCalendar(
-//             focusedDay: selectedDay,
-//             firstDay: DateTime(1990),
-//             lastDay: DateTime(2050),
-//             calendarFormat: format,
-//             onFormatChanged: (CalendarFormat _format) {
-//               setState(() {
-//                 format = _format;
-//               });
-//             },
-//             startingDayOfWeek: StartingDayOfWeek.sunday,
-//             daysOfWeekVisible: true,
-
-//             //Day Changed
-//             onDaySelected: (DateTime selectDay, DateTime focusDay) {
-//               setState(() {
-//                 selectedDay = selectDay;
-//                 focusedDay = focusDay;
-//               });
-//               print(focusedDay);
-//             },
-//             selectedDayPredicate: (DateTime date) {
-//               return isSameDay(selectedDay, date);
-//             },
-
-//             eventLoader: _getEventsfromDay,
-
-//             //To style the Calendar
-//             calendarStyle: CalendarStyle(
-//               isTodayHighlighted: true,
-//               selectedDecoration: BoxDecoration(
-//                 color: Colors.amber,
-//                 shape: BoxShape.rectangle,
-//                 borderRadius: BorderRadius.circular(5.0),
-//               ),
-//               selectedTextStyle: TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
-//               todayDecoration: BoxDecoration(
-//                 color: Color.fromARGB(255, 72, 120, 18),
-//                 shape: BoxShape.rectangle,
-//                 borderRadius: BorderRadius.circular(5.0),
-//               ),
-//               defaultDecoration: BoxDecoration(
-//                 shape: BoxShape.rectangle,
-//                 borderRadius: BorderRadius.circular(5.0),
-//               ),
-//               weekendDecoration: BoxDecoration(
-//                 shape: BoxShape.rectangle,
-//                 borderRadius: BorderRadius.circular(5.0),
-//               ),
-//             ),
-//             headerStyle: HeaderStyle(
-//               formatButtonVisible: true,
-//               titleCentered: true,
-//               formatButtonShowsNext: false,
-//               formatButtonDecoration: BoxDecoration(
-//                 color: Colors.amber,
-//                 borderRadius: BorderRadius.circular(5.0),
-//               ),
-//               formatButtonTextStyle: TextStyle(
-//                 color: Color.fromARGB(255, 0, 0, 0),
-//               ),
-//             ),
-//           ),
-//           ..._getEventsfromDay(selectedDay).map(
-//             (Event event) => ListTile(
-//               title: Text(
-//                 event.title,
-//               ),
-//               subtitle: Text(
-//                 (event.hour).format(context),
-//               ),
-//             ),
-//           ),
-//         ],  
-//       ),
-//       floatingActionButton: FloatingActionButton.extended(
-//         onPressed: () => showTimePicker(context: context, initialTime: TimeOfDay.now(), 
-//         ).then((time){
-//           if(time == null){
-//             return;
-//           }showDialog(context: context, builder: (context) => AlertDialog(
-//             title: Text("Add Event"),
-//           content: Column(
-//             mainAxisSize: MainAxisSize.min,
-//             children: [
-//               TextField(
-//                 controller: _eventController,  
-//               ),
-              
-//               Text(time.format(context)),
-//             ]
-//           ),
-//           actions: [
-//                 TextButton(
-//                   child: Text("Cancel"),
-//                   onPressed: () => Navigator.pop(context),
-//                 ),
-//                 TextButton(
-//                   child: Text("Ok"),
-//                   onPressed: () {
-//                     if (_eventController.text.isEmpty) {
-//                     return;
-//                     }
-//                     if (selectedEvents[selectedDay] != null) {
-//                     // selectedEvents[dateTime]!.add(Event(title: _eventController.text, subtitle: DateTimePicker));
-//                     selectedEvents[selectedDay]!.add(Event(title: _eventController.text, hour: time, id: ,));
-//                     } else {
-//                     selectedEvents[selectedDay] = [Event(title: _eventController.text, hour: time, id: ,)];
-//                     }
-//                     Navigator.pop(context);
-//                     _eventController.clear();
-//                     setState(() {});
-//                     return;
-//                   },
-//                 ),
-//               ],
-//         ),
-//       );
-//         }),
-//           label: Text("Add Event"),
-//           icon: Icon(Icons.add),
-//       ),
-
-//     );
-//   }
-// }

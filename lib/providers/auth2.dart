@@ -27,6 +27,7 @@ class Auth2 with ChangeNotifier {
     });
 
     sharedPref.setString('authData', myMapSPref);
+    sharedPref.setString('id', jsonDecode(myMapSPref)["uid"]);
 
     _autologout();
     notifyListeners();
@@ -149,6 +150,9 @@ class Auth2 with ChangeNotifier {
     }
 
     _idToken = myData["token"];
+
+    final sharedPref = await SharedPreferences.getInstance();
+    sharedPref.setString("uid", myData["uid"]);
 
     userId = myData["uid"];
 
